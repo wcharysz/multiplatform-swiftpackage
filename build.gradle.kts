@@ -1,3 +1,7 @@
+import java.io.File
+import java.io.FileInputStream
+import java.util.*
+
 buildscript {
     repositories {
         mavenCentral()
@@ -17,7 +21,7 @@ plugins {
     signing
 }
 
-version = "2.0.3"
+version = "2.0.3-arm64"
 
 repositories {
     jcenter()
@@ -52,7 +56,7 @@ extensions.findByName("buildScan")?.withGroovyBuilder {
 gradlePlugin {
     plugins {
         create("pluginMaven") {
-            id = "com.chromaticnoise.multiplatform-swiftpackage"
+            id = "io.github.luca992.multiplatform-swiftpackage"
             implementationClass = "com.chromaticnoise.multiplatformswiftpackage.MultiplatformSwiftPackagePlugin"
         }
     }
@@ -62,12 +66,12 @@ publishing {
     publications {
         create<MavenPublication>("pluginMaven") {
             pom {
-                groupId = "com.chromaticnoise.multiplatform-swiftpackage"
-                artifactId = "com.chromaticnoise.multiplatform-swiftpackage.gradle.plugin"
+                groupId = "io.github.luca992.multiplatform-swiftpackage"
+                artifactId = "io.github.luca992.multiplatform-swiftpackage.gradle.plugin"
 
                 name.set("Multiplatform Swift Package")
                 description.set("Gradle plugin to generate a Swift.package file and XCFramework to distribute a Kotlin Multiplatform iOS library")
-                url.set("https://github.com/ge-org/multiplatform-swiftpackage")
+                url.set(" https://github.com/luca992/multiplatform-swiftpackage")
 
                 licenses {
                     license {
@@ -81,9 +85,9 @@ publishing {
                     }
                 }
                 scm {
-                    connection.set("scm:git:https://github.com/ge-org/multiplatform-swiftpackage.git")
-                    developerConnection.set("scm:git:ssh://git@github.com/ge-org/multiplatform-swiftpackage.git")
-                    url.set("https://github.com/ge-org/multiplatform-swiftpackage")
+                    connection.set("scm:git: https://github.com/luca992/multiplatform-swiftpackage.git")
+                    developerConnection.set("scm:git:ssh://github.com/luca992/multiplatform-swiftpackage.git")
+                    url.set(" https://github.com/luca992/multiplatform-swiftpackage")
                 }
             }
         }
@@ -91,13 +95,13 @@ publishing {
 
     repositories {
         maven {
-            val releasesUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-            val snapshotsUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+            val releasesUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            val snapshotsUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
             name = "mavencentral"
             url = uri(if (version.toString().endsWith("SNAPSHOT")) snapshotsUrl else releasesUrl)
             credentials {
-                username = System.getenv("SONATYPE_NEXUS_USERNAME")
-                password = System.getenv("SONATYPE_NEXUS_PASSWORD")
+                username = System.getenv("SONATYPE_NEXUS_USERNAME") ?: properties["SONATYPE_NEXUS_USERNAME"].toString()
+                password = System.getenv("SONATYPE_NEXUS_PASSWORD") ?: properties["SONATYPE_NEXUS_PASSWORD"].toString()
             }
         }
     }
