@@ -49,7 +49,7 @@ internal fun Project.registerCreateUniversalMacosFrameworkTask() =
         group = "multiplatform-swift-package"
         description = "Creates a universal (fat) macos framework"
         val configuration = getConfigurationOrThrow()
-        onlyIf{ getMacosFrameworks(configuration).size > 1 }
+        onlyIf { getMacosFrameworks(configuration).size > 1 }
         val targets = getMacosFrameworks(configuration)
         dependsOn(targets.map { it.linkTask.name })
         doLast {
@@ -105,13 +105,14 @@ internal fun Project.registerCreateUniversalIosSimulatorFrameworkTask() =
         group = "multiplatform-swift-package"
         description = "Creates a universal (fat) ios simulator framework"
         val configuration = getConfigurationOrThrow()
-        onlyIf{ getIosSimulatorFrameworks(configuration).size > 1 }
+        onlyIf { getIosSimulatorFrameworks(configuration).size > 1 }
         val targets = getIosSimulatorFrameworks(configuration)
         dependsOn(targets.map { it.linkTask.name })
         if (targets.isNotEmpty()) {
             val buildType = if (targets[0].linkTask.name.contains("Release")) "release" else "debug"
+            baseName = configuration.packageName.value
             destinationDir = buildDir.resolve("bin/iosSimulatorUniversal/${buildType}Framework")
-            from(targets.map { it.framework!! } )
+            from(targets.mapNotNull { it.framework })
         }
     }
 
@@ -120,13 +121,14 @@ internal fun Project.registerCreateUniversalWatchosSimulatorFrameworkTask() =
         group = "multiplatform-swift-package"
         description = "Creates a universal (fat) watchos simulator framework"
         val configuration = getConfigurationOrThrow()
-        onlyIf{ getWatchosSimulatorFrameworks(configuration).size > 1 }
+        onlyIf { getWatchosSimulatorFrameworks(configuration).size > 1 }
         val targets = getWatchosSimulatorFrameworks(configuration)
         dependsOn(targets.map { it.linkTask.name })
         if (targets.isNotEmpty()) {
             val buildType = if (targets[0].linkTask.name.contains("Release")) "release" else "debug"
+            baseName = configuration.packageName.value
             destinationDir = buildDir.resolve("bin/watchosSimulatorUniversal/$buildType")
-            from(targets.map { it.framework!! })
+            from(targets.mapNotNull { it.framework })
         }
     }
 
@@ -135,13 +137,14 @@ internal fun Project.registerCreateUniversalTvosSimulatorFrameworkTask() =
         group = "multiplatform-swift-package"
         description = "Creates a universal (fat) tvos simulator framework"
         val configuration = getConfigurationOrThrow()
-        onlyIf{ getTvosSimulatorFrameworks(configuration).size > 1 }
+        onlyIf { getTvosSimulatorFrameworks(configuration).size > 1 }
         val targets = getTvosSimulatorFrameworks(configuration)
         dependsOn(targets.map { it.linkTask.name })
         if (targets.isNotEmpty()) {
             val buildType = if (targets[0].linkTask.name.contains("Release")) "release" else "debug"
+            baseName = configuration.packageName.value
             destinationDir = buildDir.resolve("bin/tvosSimulatorUniversal/$buildType")
-            from(targets.map { it.framework!! })
+            from(targets.mapNotNull { it.framework })
         }
     }
 
@@ -150,16 +153,16 @@ internal fun removeMonoFrameworksAndAddUniversalFrameworkIfNeeded(
     binFolderPrefix: String,
     buildDir: File,
     monoFrameworks: List<AppleFramework>,
-    outputFrameworks: MutableList<AppleFramework>)
-{
-    if (monoFrameworks.size > 1){
+    outputFrameworks: MutableList<AppleFramework>
+) {
+    if (monoFrameworks.size > 1) {
         monoFrameworks.forEach { mono ->
-            outputFrameworks.removeIf{ mono.outputFile == it.outputFile}
+            outputFrameworks.removeIf { mono.outputFile == it.outputFile }
         }
         val frameworkName = monoFrameworks[0].name
         val buildType = if (monoFrameworks[0].linkTask.name.contains("Release")) "release" else "debug"
         val destinationDir = buildDir.resolve("bin/${binFolderPrefix}Universal/${buildType}Framework")
-        val outputFile = AppleFrameworkOutputFile(File(destinationDir ,"${frameworkName.value}.framework"))
+        val outputFile = AppleFrameworkOutputFile(File(destinationDir, "${frameworkName.value}.framework"))
         outputFrameworks.add(
             AppleFramework(
                 outputFile,
@@ -171,14 +174,15 @@ internal fun removeMonoFrameworksAndAddUniversalFrameworkIfNeeded(
 }
 
 
-
 internal fun Project.registerCreateXCFrameworkTask() = tasks.register("createXCFramework", Exec::class.java) {
     group = "multiplatform-swift-package"
     description = "Creates an XCFramework for all declared Apple targets"
 
     val configuration = getConfigurationOrThrow()
-    val xcFrameworkDestination = File(configuration.outputDirectory.value, "${configuration.packageName.value}.xcframework")
-    val outputFrameworks = configuration.appleTargets.mapNotNull { it.getFramework(configuration.buildConfiguration) }.toMutableList()
+    val xcFrameworkDestination =
+        File(configuration.outputDirectory.value, "${configuration.packageName.value}.xcframework")
+    val outputFrameworks =
+        configuration.appleTargets.mapNotNull { it.getFramework(configuration.buildConfiguration) }.toMutableList()
 
     dependsOn(outputFrameworks.map { it.linkTask.name })
     dependsOn("createUniversalMacosFramework")
