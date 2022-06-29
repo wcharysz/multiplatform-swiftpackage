@@ -20,7 +20,7 @@ plugins {
     signing
 }
 
-version = "2.0.4-arm64"
+version = "2.0.5-arm64"
 
 repositories {
     mavenCentral()
