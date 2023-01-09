@@ -1,7 +1,3 @@
-import java.io.File
-import java.io.FileInputStream
-import java.util.*
-
 buildscript {
     repositories {
         mavenCentral()
@@ -20,7 +16,7 @@ plugins {
     signing
 }
 
-version = "2.0.5-arm64"
+version = "2.1.0"
 
 repositories {
     mavenCentral()
