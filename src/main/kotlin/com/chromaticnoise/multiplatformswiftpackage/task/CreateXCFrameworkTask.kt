@@ -1,8 +1,6 @@
 package com.chromaticnoise.multiplatformswiftpackage.task
 
 import com.chromaticnoise.multiplatformswiftpackage.domain.*
-import com.chromaticnoise.multiplatformswiftpackage.domain.PluginConfiguration
-import com.chromaticnoise.multiplatformswiftpackage.domain.getConfigurationOrThrow
 import org.gradle.api.Project
 import org.gradle.api.tasks.Exec
 import org.gradle.kotlin.dsl.task
@@ -41,62 +39,18 @@ internal fun getTvosSimulatorFrameworks(configuration: PluginConfiguration): Lis
 }
 
 internal fun Project.registerCreateUniversalMacosFrameworkTask() =
-    task("createUniversalMacosFramework") {
-        // Can't use FatFrameworkTask 🙃
-        // https://youtrack.jetbrains.com/issue/KT-47355/Support-macos-target-for-FatFramework-task
-        // workaround:
-        // https://gist.github.com/JUSTINMKAUFMAN/6627c3c8571563b36efc9c832f6fa2b1
+    task<FatFrameworkTask>("createUniversalMacosSimulatorFramework") {
         group = "multiplatform-swift-package"
         description = "Creates a universal (fat) macos framework"
         val configuration = getConfigurationOrThrow()
         onlyIf { getMacosFrameworks(configuration).size > 1 }
         val targets = getMacosFrameworks(configuration)
         dependsOn(targets.map { it.linkTask.name })
-        doLast {
-            if (targets.isNotEmpty()) {
-                delete(buildDir.resolve("bin/macosUniversal"))
-                val buildType = if (targets[0].linkTask.name.contains("Release")) "release" else "debug"
-                val frameworkName = targets[0].name.value
-                val destinationDir = buildDir.resolve("bin/macosUniversal/${buildType}Framework")
-                mkdir(destinationDir.parent)
-                mkdir(destinationDir)
-                val tempUniversalBinaryLocation = File(destinationDir, frameworkName)
-                exec {
-                    commandLine(
-                        "lipo",
-                        "-create",
-                        "${targets[0].outputFile.path}/Versions/A/${frameworkName}",
-                        "${targets[1].outputFile.path}/Versions/A/${frameworkName}",
-                        "-output",
-                        tempUniversalBinaryLocation.path
-                    )
-                }
-                val aFramework = targets[0].outputFile.path
-                copy {
-                    from(aFramework)
-                    into(File(destinationDir, "$frameworkName.framework"))
-                }
-                // delete the old mono framework binary we copied here
-                val binaryFinalLocation = File(destinationDir, "${frameworkName}.framework/Versions/A/$frameworkName")
-                val binaryFinalSymlinkLocation = File(destinationDir, "${frameworkName}.framework/$frameworkName")
-                delete(binaryFinalLocation)
-                delete(binaryFinalSymlinkLocation)
-                // copy new universal binary to binaryFinalSymlinkLocation
-                copy {
-                    from(tempUniversalBinaryLocation)
-                    into(File(destinationDir, "$frameworkName.framework/Versions/A"))
-                }
-                delete(tempUniversalBinaryLocation)
-                exec {
-                    //recreate the symlink normally to the binary normally in framework folder
-                    commandLine(
-                        "ln",
-                        "-s",
-                        binaryFinalLocation.toPath(),
-                        binaryFinalSymlinkLocation.toPath()
-                    )
-                }
-            }
+        if (targets.isNotEmpty()) {
+            val buildType = if (targets[0].linkTask.name.contains("Release")) "release" else "debug"
+            baseName = checkNotNull(targets.first().name.value)
+            destinationDir = buildDir.resolve("bin/macosUniversal/${buildType}Framework")
+            from(targets.mapNotNull { it.framework })
         }
     }
 
