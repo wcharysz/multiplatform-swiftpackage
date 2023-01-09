@@ -16,8 +16,16 @@ You can upload the ZIP file to your package registry so that SPM can download it
 The plugin is published on Maven central. Add it to the `plugins` block in the Gradle build file.
 
 ```kotlin
+// settings.gradle.kts
+pluginManagement {
+  repositories {
+    maven ("https://s01.oss.sonatype.org/content/repositories/releases/")
+  }
+}
+
+// build.gradle.kts
 plugins {
-  id("com.chromaticnoise.multiplatform-swiftpackage") version "2.0.3"
+  id("io.github.luca992.multiplatform-swiftpackage") version "2.1.0"
 }
 ```
 
