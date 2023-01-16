@@ -39,7 +39,7 @@ internal fun getTvosSimulatorFrameworks(configuration: PluginConfiguration): Lis
 }
 
 internal fun Project.registerCreateUniversalMacosFrameworkTask() =
-    task<FatFrameworkTask>("createUniversalMacosSimulatorFramework") {
+    task<FatFrameworkTask>("createUniversalMacosFramework") {
         group = "multiplatform-swift-package"
         description = "Creates a universal (fat) macos framework"
         val configuration = getConfigurationOrThrow()
