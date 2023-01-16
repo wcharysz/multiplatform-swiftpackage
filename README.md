@@ -25,7 +25,7 @@ pluginManagement {
 
 // build.gradle.kts
 plugins {
-  id("io.github.luca992.multiplatform-swiftpackage") version "2.1.0"
+  id("io.github.luca992.multiplatform-swiftpackage") version "2.1.1"
 }
 ```
 
