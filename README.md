@@ -25,7 +25,10 @@ pluginManagement {
 
 // build.gradle.kts
 plugins {
+  // projects targting kotlin >=1.8.0
   id("io.github.luca992.multiplatform-swiftpackage") version "2.1.1"
+  // projects targting kotlin <1.8.0
+  id("io.github.luca992.multiplatform-swiftpackage") version "2.0.5-arm64"
 }
 ```
 
