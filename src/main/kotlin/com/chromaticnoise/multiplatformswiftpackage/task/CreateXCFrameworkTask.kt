@@ -25,16 +25,16 @@ internal fun getIosSimulatorFrameworks(configuration: PluginConfiguration): List
 internal fun getWatchosSimulatorFrameworks(configuration: PluginConfiguration): List<AppleFramework> {
     return configuration.appleTargets.mapNotNull { it.getFramework(configuration.buildConfiguration) }
         .filter {
-            it.linkTask.name.contains("watchosX86")
-                    || it.linkTask.name.contains("watchosX64")
-                    || it.linkTask.name.contains("watchosSimulatorArm64")
+            it.linkTask.name.contains("WatchosX86")
+                    || it.linkTask.name.contains("WatchosX64")
+                    || it.linkTask.name.contains("WatchosSimulatorArm64")
         }
 }
 
 internal fun getTvosSimulatorFrameworks(configuration: PluginConfiguration): List<AppleFramework> {
     return configuration.appleTargets.mapNotNull { it.getFramework(configuration.buildConfiguration) }
         .filter {
-            it.linkTask.name.contains("tvosX64") || it.linkTask.name.contains("tvosSimulatorArm64")
+            it.linkTask.name.contains("TvosX64") || it.linkTask.name.contains("TvosSimulatorArm64")
         }
 }
 
@@ -81,7 +81,7 @@ internal fun Project.registerCreateUniversalWatchosSimulatorFrameworkTask() =
         if (targets.isNotEmpty()) {
             val buildType = if (targets[0].linkTask.name.contains("Release")) "release" else "debug"
             baseName = checkNotNull(targets.first().name.value)
-            destinationDir = buildDir.resolve("bin/watchosSimulatorUniversal/$buildType")
+            destinationDir = buildDir.resolve("bin/watchosSimulatorUniversal/${buildType}Framework")
             from(targets.mapNotNull { it.framework })
         }
     }
@@ -97,7 +97,7 @@ internal fun Project.registerCreateUniversalTvosSimulatorFrameworkTask() =
         if (targets.isNotEmpty()) {
             val buildType = if (targets[0].linkTask.name.contains("Release")) "release" else "debug"
             baseName = checkNotNull(targets.first().name.value)
-            destinationDir = buildDir.resolve("bin/tvosSimulatorUniversal/$buildType")
+            destinationDir = buildDir.resolve("bin/tvosSimulatorUniversal/${buildType}Framework")
             from(targets.mapNotNull { it.framework })
         }
     }
