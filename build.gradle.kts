@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.jetbrains.kotlinx:binary-compatibility-validator:0.12.1")
+        classpath("org.jetbrains.kotlinx:binary-compatibility-validator:0.13.2")
     }
 }
 
@@ -22,13 +22,17 @@ repositories {
     mavenCentral()
 }
 
+kotlin {
+    jvmToolchain(8)
+}
+
 dependencies {
-    compileOnly(kotlin("gradle-plugin", "1.8.0"))
-    testImplementation("io.kotest:kotest-runner-junit5:5.5.4")
-    testImplementation("io.kotest:kotest-assertions-core:5.5.4")
-    testImplementation("io.kotest:kotest-property:5.5.4")
-    testImplementation("io.mockk:mockk:1.13.2")
-    testImplementation(kotlin("gradle-plugin", "1.8.0"))
+    compileOnly(kotlin("gradle-plugin", "1.8.22"))
+    testImplementation("io.kotest:kotest-runner-junit5:5.6.2")
+    testImplementation("io.kotest:kotest-assertions-core:5.6.2")
+    testImplementation("io.kotest:kotest-property:5.6.2")
+    testImplementation("io.mockk:mockk:1.13.5")
+    testImplementation(kotlin("gradle-plugin", "1.8.22"))
 }
 
 java {
