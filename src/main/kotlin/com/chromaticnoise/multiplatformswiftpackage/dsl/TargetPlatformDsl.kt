@@ -47,6 +47,7 @@ public class TargetPlatformDsl {
                 Either.Right(TargetName.WatchOSarm64),
                 Either.Right(TargetName.WatchOSx86),
                 Either.Right(TargetName.WatchOSx64),
+                Either.Right(TargetName.WatchOSDeviceArm64),
                 Either.Right(TargetName.WatchOSSimulatorArm64)
             ),
             version
