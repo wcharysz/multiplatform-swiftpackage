@@ -104,8 +104,8 @@ publishing {
             name = "mavencentral"
             url = uri(if (version.toString().endsWith("SNAPSHOT")) snapshotsUrl else releasesUrl)
             credentials {
-                username = System.getenv("SONATYPE_NEXUS_USERNAME") ?: properties["SONATYPE_NEXUS_USERNAME"].toString()
-                password = System.getenv("SONATYPE_NEXUS_PASSWORD") ?: properties["SONATYPE_NEXUS_PASSWORD"].toString()
+                username = System.getenv("ossrh.username") ?: properties["ossrh.username"].toString()
+                password = System.getenv("ossrh.password") ?: properties["ossrh.password"].toString()
             }
         }
     }
