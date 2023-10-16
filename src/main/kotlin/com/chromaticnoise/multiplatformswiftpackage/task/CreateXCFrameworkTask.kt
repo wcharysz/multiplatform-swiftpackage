@@ -27,6 +27,7 @@ internal fun getWatchosSimulatorFrameworks(configuration: PluginConfiguration): 
         .filter {
             it.linkTask.name.contains("WatchosX86")
                     || it.linkTask.name.contains("WatchosX64")
+                    || it.linkTask.name.contains("WatchosDeviceArm64")
                     || it.linkTask.name.contains("WatchosSimulatorArm64")
         }
 }
