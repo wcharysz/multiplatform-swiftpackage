@@ -205,3 +205,5 @@ gradle-app.setting
 **/build/
 
 # End of https://www.toptal.com/developers/gitignore/api/gradle,intellij+all,macos,windows,linux,kotlin
+
+local.properties
