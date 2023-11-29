@@ -115,9 +115,10 @@ internal fun removeMonoFrameworksAndAddUniversalFrameworkIfNeeded(
             outputFrameworks.removeIf { mono.outputFile == it.outputFile }
         }
         val frameworkName = monoFrameworks[0].name
+        val frameworkNameLegalChars = frameworkName.value.replace("-", "_")
         val buildType = if (monoFrameworks[0].linkTask.name.contains("Release")) "release" else "debug"
         val destinationDir = buildDir.resolve("bin/${binFolderPrefix}Universal/${buildType}Framework")
-        val outputFile = AppleFrameworkOutputFile(File(destinationDir, "${frameworkName.value}.framework"))
+        val outputFile = AppleFrameworkOutputFile(File(destinationDir, "${frameworkNameLegalChars}.framework"))
         outputFrameworks.add(
             AppleFramework(
                 outputFile,
