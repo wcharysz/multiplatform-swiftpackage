@@ -10,7 +10,7 @@ buildscript {
 apply(plugin = "binary-compatibility-validator")
 
 plugins {
-    `kotlin-dsl`
+    alias(libs.plugins.org.gradle.kotlin.dsl)
     `java-gradle-plugin`
     `maven-publish`
     signing
@@ -27,17 +27,17 @@ kotlin {
 }
 
 dependencies {
-    compileOnly(kotlin("gradle-plugin", libs.versions.kotlin.get()))
+    compileOnly(libs.kotlin.gradle.plugin)
     testImplementation(libs.kotest.runner.junit5)
     testImplementation(libs.kotest.assertions.core)
     testImplementation(libs.kotest.property)
     testImplementation(libs.mockk)
-    testImplementation(kotlin("gradle-plugin", libs.versions.kotlin.get()))
+    testImplementation(libs.kotlin.gradle.plugin)
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 
     withJavadocJar()
     withSourcesJar()

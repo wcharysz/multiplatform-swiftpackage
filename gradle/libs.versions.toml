@@ -2,11 +2,12 @@
 
 [plugins]
 
-org-gradle-kotlin-kotlin-dsl = { id = "org.gradle.kotlin.kotlin-dsl", version = "4.2.1" }
+org-gradle-kotlin-dsl = { id = "org.gradle.kotlin.kotlin-dsl", version.ref = "kotlin-dsl" }
 
 [versions]
 
-kotlin = "1.9.21"
+kotlin = "1.9.22"
+kotlin-dsl = "4.2.1"
 
 kotest = "5.8.0"
 
