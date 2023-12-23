@@ -177,20 +177,23 @@ internal fun Project.registerCreateXCFrameworkTask() = tasks.register("createXCF
 
 
     executable = "xcodebuild"
-    args(mutableListOf<String>().apply {
-        add("-create-xcframework")
-        add("-output")
-        add(xcFrameworkDestination.path)
-        outputFrameworks.forEach { framework ->
-            add("-framework")
-            add(framework.outputFile.path)
 
-            framework.dsymFile.takeIf { it.exists() }?.let { dsymFile ->
-                add("-debug-symbols")
-                add(dsymFile.absolutePath)
+    doLast {
+        args(mutableListOf<String>().apply {
+            add("-create-xcframework")
+            add("-output")
+            add(xcFrameworkDestination.path)
+            outputFrameworks.forEach { framework ->
+                add("-framework")
+                add(framework.outputFile.path)
+
+                framework.dsymFile.takeIf { it.exists() }?.let { dsymFile ->
+                    add("-debug-symbols")
+                    add(dsymFile.absolutePath)
+                }
             }
-        }
-    })
+        })
+    }
 
     doFirst {
         xcFrameworkDestination.deleteRecursively()
