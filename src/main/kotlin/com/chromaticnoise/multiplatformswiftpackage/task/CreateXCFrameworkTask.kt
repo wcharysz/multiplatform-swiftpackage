@@ -2,7 +2,6 @@ package com.chromaticnoise.multiplatformswiftpackage.task
 
 import com.chromaticnoise.multiplatformswiftpackage.domain.*
 import org.gradle.api.Project
-import org.gradle.api.tasks.Exec
 import org.gradle.kotlin.dsl.task
 import org.jetbrains.kotlin.gradle.tasks.FatFrameworkTask
 import java.io.File
@@ -130,7 +129,7 @@ internal fun removeMonoFrameworksAndAddUniversalFrameworkIfNeeded(
 }
 
 
-internal fun Project.registerCreateXCFrameworkTask() = tasks.register("createXCFramework", Exec::class.java) {
+internal fun Project.registerCreateXCFrameworkTask() = tasks.register("createXCFramework") {
     group = "multiplatform-swift-package"
     description = "Creates an XCFramework for all declared Apple targets"
 
@@ -175,24 +174,24 @@ internal fun Project.registerCreateXCFrameworkTask() = tasks.register("createXCF
         outputFrameworks
     )
 
-
-    executable = "xcodebuild"
-
     doLast {
-        args(mutableListOf<String>().apply {
-            add("-create-xcframework")
-            add("-output")
-            add(xcFrameworkDestination.path)
-            outputFrameworks.forEach { framework ->
-                add("-framework")
-                add(framework.outputFile.path)
+        exec {
+            executable = "xcodebuild"
+            this.args(mutableListOf<String>().apply {
+                add("-create-xcframework")
+                add("-output")
+                add(xcFrameworkDestination.path)
+                outputFrameworks.forEach { framework ->
+                    add("-framework")
+                    add(framework.outputFile.path)
 
-                framework.dsymFile.takeIf { it.exists() }?.let { dsymFile ->
-                    add("-debug-symbols")
-                    add(dsymFile.absolutePath)
+                    framework.dsymFile.takeIf { it.exists() }?.let { dsymFile ->
+                        add("-debug-symbols")
+                        add(dsymFile.absolutePath)
+                    }
                 }
-            }
-        })
+            })
+        }
     }
 
     doFirst {
