@@ -19,9 +19,7 @@ The plugin is published on Maven central. Add it to the `plugins` block in the G
 // build.gradle.kts
 plugins {
   // projects targeting kotlin >=1.8.0
-  id("io.github.luca992.multiplatform-swiftpackage") version "2.2.1"
-  // projects targeting kotlin <1.8.0
-  id("io.github.luca992.multiplatform-swiftpackage") version "2.0.5-arm64"
+  id("io.github.luca992.multiplatform-swiftpackage") version "2.2.2"
 }
 ```
 
