@@ -16,14 +16,14 @@ plugins {
     signing
 }
 
-version = "2.2.1"
+version = "2.2.2-SNAPSHOT"
 
 repositories {
     mavenCentral()
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(8)
 }
 
 dependencies {
