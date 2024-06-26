@@ -10,7 +10,7 @@ buildscript {
 apply(plugin = "binary-compatibility-validator")
 
 plugins {
-    alias(libs.plugins.org.gradle.kotlin.dsl)
+    `kotlin-dsl`
     `java-gradle-plugin`
     `maven-publish`
     signing

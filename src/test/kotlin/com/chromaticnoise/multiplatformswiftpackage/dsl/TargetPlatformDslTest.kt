@@ -40,11 +40,6 @@ class TargetPlatformDslTest : StringSpec() {
                 .shouldHaveTarget("watchosArm64")
         }
 
-        "adding watchOS targets should add x86 target" {
-            TargetPlatformDsl().apply { watchOS(someVersion) }.targetPlatforms
-                .shouldHaveTarget("watchosX86")
-        }
-
         "adding watchOS targets should add arm 64 simulator target" {
             TargetPlatformDsl().apply { watchOS(someVersion) }.targetPlatforms
                 .shouldHaveTarget("watchosSimulatorArm64")

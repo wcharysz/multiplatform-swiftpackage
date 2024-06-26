@@ -6,7 +6,6 @@ internal enum class TargetName(val identifier: String) {
     IOSSimulatorArm64("iosSimulatorArm64"),
     WatchOSarm32("watchosArm32"),
     WatchOSarm64("watchosArm64"),
-    WatchOSx86("watchosX86"),
     WatchOSx64("watchosX64"),
     WatchOSDeviceArm64("watchosDeviceArm64"),
     WatchOSSimulatorArm64("watchosSimulatorArm64"),
