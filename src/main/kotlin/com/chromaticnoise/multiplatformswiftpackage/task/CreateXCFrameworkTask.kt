@@ -49,7 +49,7 @@ internal fun Project.registerCreateUniversalMacosFrameworkTask() =
         if (targets.isNotEmpty()) {
             val buildType = if (targets[0].linkTask.name.contains("Release")) "release" else "debug"
             baseName = checkNotNull(targets.first().name.value)
-            destinationDir = buildDir.resolve("bin/macosUniversal/${buildType}Framework")
+            destinationDirProperty.set(layout.buildDirectory.dir("bin/macosUniversal/${buildType}Framework"))
             from(targets.mapNotNull { it.framework })
         }
     }
@@ -65,7 +65,7 @@ internal fun Project.registerCreateUniversalIosSimulatorFrameworkTask() =
         if (targets.isNotEmpty()) {
             val buildType = if (targets[0].linkTask.name.contains("Release")) "release" else "debug"
             baseName = checkNotNull(targets.first().name.value)
-            destinationDir = buildDir.resolve("bin/iosSimulatorUniversal/${buildType}Framework")
+            destinationDirProperty.set(layout.buildDirectory.dir("bin/iosSimulatorUniversal/${buildType}Framework"))
             from(targets.mapNotNull { it.framework })
         }
     }
@@ -81,7 +81,7 @@ internal fun Project.registerCreateUniversalWatchosSimulatorFrameworkTask() =
         if (targets.isNotEmpty()) {
             val buildType = if (targets[0].linkTask.name.contains("Release")) "release" else "debug"
             baseName = checkNotNull(targets.first().name.value)
-            destinationDir = buildDir.resolve("bin/watchosSimulatorUniversal/${buildType}Framework")
+            destinationDirProperty.set(layout.buildDirectory.dir("bin/watchosSimulatorUniversal/${buildType}Framework"))
             from(targets.mapNotNull { it.framework })
         }
     }
@@ -97,7 +97,7 @@ internal fun Project.registerCreateUniversalTvosSimulatorFrameworkTask() =
         if (targets.isNotEmpty()) {
             val buildType = if (targets[0].linkTask.name.contains("Release")) "release" else "debug"
             baseName = checkNotNull(targets.first().name.value)
-            destinationDir = buildDir.resolve("bin/tvosSimulatorUniversal/${buildType}Framework")
+            destinationDirProperty.set(layout.buildDirectory.dir("bin/tvosSimulatorUniversal/${buildType}Framework"))
             from(targets.mapNotNull { it.framework })
         }
     }
@@ -148,28 +148,28 @@ internal fun Project.registerCreateXCFrameworkTask() = tasks.register("createXCF
     val macosFrameworks = getMacosFrameworks(configuration)
     removeMonoFrameworksAndAddUniversalFrameworkIfNeeded(
         "macos",
-        buildDir,
+        layout.buildDirectory.asFile.get(),
         macosFrameworks,
         outputFrameworks
     )
     val iosSimulatorFrameworks = getIosSimulatorFrameworks(configuration)
     removeMonoFrameworksAndAddUniversalFrameworkIfNeeded(
         "iosSimulator",
-        buildDir,
+        layout.buildDirectory.asFile.get(),
         iosSimulatorFrameworks,
         outputFrameworks
     )
     val watchosSimulatorFrameworks = getWatchosSimulatorFrameworks(configuration)
     removeMonoFrameworksAndAddUniversalFrameworkIfNeeded(
         "watchosSimulator",
-        buildDir,
+        layout.buildDirectory.asFile.get(),
         watchosSimulatorFrameworks,
         outputFrameworks
     )
     val tvosSimulatorFrameworks = getTvosSimulatorFrameworks(configuration)
     removeMonoFrameworksAndAddUniversalFrameworkIfNeeded(
         "tvosSimulator",
-        buildDir,
+        layout.buildDirectory.asFile.get(),
         tvosSimulatorFrameworks,
         outputFrameworks
     )
