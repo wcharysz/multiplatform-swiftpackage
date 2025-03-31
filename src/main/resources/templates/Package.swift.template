@@ -9,6 +9,7 @@ let package = Package(
     products: [
         .library(
             name: "$name",
+            <% if (hasLibraryType) { %>type: .${libraryType},<% } %>
             targets: ["$name"]
         ),
     ],

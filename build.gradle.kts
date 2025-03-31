@@ -16,14 +16,14 @@ plugins {
     signing
 }
 
-version = "2.2.3"
+version = "2.2.4"
 
 repositories {
     mavenCentral()
 }
 
 kotlin {
-    jvmToolchain(8)
+    jvmToolchain(21)
 }
 
 dependencies {
@@ -60,7 +60,7 @@ extensions.findByName("buildScan")?.withGroovyBuilder {
 gradlePlugin {
     plugins {
         create("pluginMaven") {
-            id = "io.github.luca992.multiplatform-swiftpackage"
+            id = "io.github.wcharysz.multiplatform-swiftpackage"
             implementationClass = "com.chromaticnoise.multiplatformswiftpackage.MultiplatformSwiftPackagePlugin"
         }
     }
@@ -70,12 +70,12 @@ publishing {
     publications {
         create<MavenPublication>("pluginMaven") {
             pom {
-                groupId = "io.github.luca992.multiplatform-swiftpackage"
-                artifactId = "io.github.luca992.multiplatform-swiftpackage.gradle.plugin"
+                groupId = "io.github.wcharysz.multiplatform-swiftpackage"
+                artifactId = "io.github.wcharysz.multiplatform-swiftpackage.gradle.plugin"
 
                 name.set("Multiplatform Swift Package")
                 description.set("Gradle plugin to generate a Swift.package file and XCFramework to distribute a Kotlin Multiplatform iOS library")
-                url.set(" https://github.com/luca992/multiplatform-swiftpackage")
+                url.set(" https://github.com/wcharysz/multiplatform-swiftpackage")
 
                 licenses {
                     license {
@@ -89,9 +89,9 @@ publishing {
                     }
                 }
                 scm {
-                    connection.set("scm:git: https://github.com/luca992/multiplatform-swiftpackage.git")
-                    developerConnection.set("scm:git:ssh://github.com/luca992/multiplatform-swiftpackage.git")
-                    url.set(" https://github.com/luca992/multiplatform-swiftpackage")
+                    connection.set("scm:git: https://github.com/wcharysz/multiplatform-swiftpackage.git")
+                    developerConnection.set("scm:git:ssh://github.com/wcharysz/multiplatform-swiftpackage.git")
+                    url.set(" https://github.com/wcharysz/multiplatform-swiftpackage")
                 }
             }
         }

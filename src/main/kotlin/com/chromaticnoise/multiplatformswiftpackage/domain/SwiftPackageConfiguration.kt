@@ -10,7 +10,8 @@ internal data class SwiftPackageConfiguration(
     private val platforms: String,
     private val distributionMode: DistributionMode,
     private val zipChecksum: String,
-    private val zipFileName: ZipFileName
+    private val zipFileName: ZipFileName,
+    private val libraryType: LibraryType? = null
 ) {
 
     private val distributionUrl = when (distributionMode) {
@@ -24,7 +25,9 @@ internal data class SwiftPackageConfiguration(
         "platforms" to platforms,
         "isLocal" to (distributionMode == DistributionMode.Local),
         "url" to distributionUrl?.value,
-        "checksum" to zipChecksum.trim()
+        "checksum" to zipChecksum.trim(),
+        "hasLibraryType" to (libraryType != null),
+        "libraryType" to libraryType?.value
     )
 
     internal companion object {
