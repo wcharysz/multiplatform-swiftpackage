@@ -18,6 +18,7 @@ plugins {
     id("com.vanniktech.maven.publish") version "0.31.0"
 }
 
+group = "io.github.wcharysz.multiplatformswiftpackage"
 version = "2.2.4"
 
 repositories {
