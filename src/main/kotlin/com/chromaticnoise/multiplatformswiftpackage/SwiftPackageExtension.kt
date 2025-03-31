@@ -88,14 +88,14 @@ public open class SwiftPackageExtension(internal val project: Project) {
      * Builder for instances of [TargetPlatform].
      */
     public fun targetPlatforms(configure: TargetPlatformDsl.() -> Unit) {
-        TargetPlatformDsl().also { dsl ->
+        TargetPlatformDsl(project).also { dsl ->
             dsl.configure()
             targetPlatforms = dsl.targetPlatforms
         }
     }
 
     public fun targetPlatforms(configure: Closure<TargetPlatformDsl>) {
-        val dsl = TargetPlatformDsl()
+        val dsl = TargetPlatformDsl(project)
         configure.delegate = dsl
         configure.call()
         targetPlatforms = dsl.targetPlatforms
