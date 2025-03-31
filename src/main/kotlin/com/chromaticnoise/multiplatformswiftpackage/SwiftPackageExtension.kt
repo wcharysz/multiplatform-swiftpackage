@@ -7,7 +7,7 @@ import com.chromaticnoise.multiplatformswiftpackage.dsl.DistributionModeDSL
 import com.chromaticnoise.multiplatformswiftpackage.dsl.TargetPlatformDsl
 import groovy.lang.Closure
 import org.gradle.api.Project
-import org.gradle.util.ConfigureUtil
+import org.gradle.api.Action
 import java.io.File
 
 public open class SwiftPackageExtension(internal val project: Project) {
@@ -20,6 +20,7 @@ public open class SwiftPackageExtension(internal val project: Project) {
     internal var targetPlatforms: Collection<Either<List<PluginConfigurationError>, TargetPlatform>> = emptyList()
     internal var appleTargets: Collection<AppleTarget> = emptyList()
     internal var zipFileName: Either<PluginConfigurationError, ZipFileName>? = null
+    internal var libraryType: Either<PluginConfigurationError, LibraryType>? = null
 
     /**
      * Sets the name of the Swift package.
@@ -60,7 +61,10 @@ public open class SwiftPackageExtension(internal val project: Project) {
     }
 
     public fun buildConfiguration(configure: Closure<BuildConfigurationDSL>) {
-        buildConfiguration { ConfigureUtil.configure(configure, this) }
+        val dsl = BuildConfigurationDSL()
+        configure.delegate = dsl
+        configure.call()
+        buildConfiguration = dsl.buildConfiguration
     }
 
     /**
@@ -74,7 +78,10 @@ public open class SwiftPackageExtension(internal val project: Project) {
     }
 
     public fun distributionMode(configure: Closure<DistributionModeDSL>) {
-        distributionMode { ConfigureUtil.configure(configure, this) }
+        val dsl = DistributionModeDSL()
+        configure.delegate = dsl
+        configure.call()
+        distributionMode = dsl.distributionMode
     }
 
     /**
@@ -88,7 +95,10 @@ public open class SwiftPackageExtension(internal val project: Project) {
     }
 
     public fun targetPlatforms(configure: Closure<TargetPlatformDsl>) {
-        targetPlatforms { ConfigureUtil.configure(configure, this) }
+        val dsl = TargetPlatformDsl()
+        configure.delegate = dsl
+        configure.call()
+        targetPlatforms = dsl.targetPlatforms
     }
 
     /**
@@ -100,5 +110,15 @@ public open class SwiftPackageExtension(internal val project: Project) {
      */
     public fun zipFileName(name: String) {
         zipFileName = ZipFileName.of(name)
+    }
+
+    /**
+     * Sets the library type of the Swift package (.static or .dynamic).
+     * If not set, no type will be specified in the Package.swift file.
+     *
+     * @param type The library type to use.
+     */
+    public fun libraryType(type: String) {
+        libraryType = LibraryType.of(type)
     }
 }

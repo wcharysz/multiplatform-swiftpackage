@@ -40,5 +40,7 @@ private fun List<PluginConfigurationError>.toErrorMessage() = joinToString("\n\n
         PluginConfigurationError.BlankZipFileName -> """
         * ZIP file name must not be blank
         """.trimIndent()
+
+        is PluginConfigurationError.InvalidLibraryType -> "Library type must be either 'static' or 'dynamic'".trimIndent()
     }
 }

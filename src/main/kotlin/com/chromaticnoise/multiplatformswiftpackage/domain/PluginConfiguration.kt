@@ -12,7 +12,8 @@ internal class PluginConfiguration private constructor(
     val distributionMode: DistributionMode,
     val targetPlatforms: Collection<TargetPlatform>,
     val appleTargets: Collection<AppleTarget>,
-    val zipFileName: ZipFileName
+    val zipFileName: ZipFileName,
+    val libraryType: LibraryType? = null
 ) {
     internal companion object {
         fun of(extension: SwiftPackageExtension): Either<List<PluginConfigurationError>, PluginConfiguration> {
@@ -52,7 +53,8 @@ internal class PluginConfiguration private constructor(
                         extension.distributionMode,
                         targetPlatforms,
                         extension.appleTargets,
-                        extension.zipFileName?.orNull ?: defaultZipFileName(packageName.orNull!!, extension.project)
+                        extension.zipFileName?.orNull ?: defaultZipFileName(packageName.orNull!!, extension.project),
+                        extension.libraryType?.orNull
                     )
                 )
             } else {
@@ -76,5 +78,8 @@ internal class PluginConfiguration private constructor(
         object MissingAppleTargets : PluginConfigurationError()
         object BlankPackageName : PluginConfigurationError()
         object BlankZipFileName : PluginConfigurationError()
+        class InvalidLibraryType(type: String) : PluginConfigurationError()
     }
+
+
 }
