@@ -18,8 +18,8 @@ plugins {
     id("com.vanniktech.maven.publish") version "0.31.0"
 }
 
-group = "io.github.wcharysz.multiplatformswiftpackage"
-version = "2.2.4"
+group = "io.github.wcharysz"
+version = "2.2.5"
 
 repositories {
     mavenCentral()
@@ -39,8 +39,8 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 
     withSourcesJar()
 }
@@ -57,6 +57,17 @@ project.tasks.named("processResources", Copy::class.java) {
 extensions.findByName("buildScan")?.withGroovyBuilder {
     setProperty("termsOfServiceUrl", "https://gradle.com/terms-of-service")
     setProperty("termsOfServiceAgree", "yes")
+}
+
+gradlePlugin {
+    plugins {
+        create("multiplatformSwiftPackage") {
+            id = "io.github.wcharysz.multiplatform-swiftpackage"
+            implementationClass = "com.chromaticnoise.multiplatformswiftpackage.MultiplatformSwiftPackagePlugin"
+            displayName = "Multiplatform Swift Package Export"
+            description = "Gradle plugin to generate a Swift.package file and XCFramework to distribute a Kotlin Multiplatform iOS library"
+        }
+    }
 }
 
 mavenPublishing {
