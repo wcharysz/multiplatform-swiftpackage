@@ -1,3 +1,5 @@
+import com.vanniktech.maven.publish.SonatypeHost
+
 buildscript {
     repositories {
         mavenCentral()
@@ -12,8 +14,8 @@ apply(plugin = "binary-compatibility-validator")
 plugins {
     `kotlin-dsl`
     `java-gradle-plugin`
-    `maven-publish`
     signing
+    id("com.vanniktech.maven.publish") version "0.31.0"
 }
 
 version = "2.2.4"
@@ -57,62 +59,41 @@ extensions.findByName("buildScan")?.withGroovyBuilder {
     setProperty("termsOfServiceAgree", "yes")
 }
 
-gradlePlugin {
-    plugins {
-        create("pluginMaven") {
-            id = "io.github.wcharysz.multiplatform-swiftpackage"
-            implementationClass = "com.chromaticnoise.multiplatformswiftpackage.MultiplatformSwiftPackagePlugin"
-        }
-    }
-}
+mavenPublishing {
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    signAllPublications()
 
-publishing {
-    publications {
-        create<MavenPublication>("pluginMaven") {
-            pom {
-                groupId = "io.github.wcharysz.multiplatform-swiftpackage"
-                artifactId = "io.github.wcharysz.multiplatform-swiftpackage.gradle.plugin"
+    coordinates(group.toString(), "multiplatform-swiftpackage", version.toString())
 
-                name.set("Multiplatform Swift Package")
-                description.set("Gradle plugin to generate a Swift.package file and XCFramework to distribute a Kotlin Multiplatform iOS library")
-                url.set(" https://github.com/wcharysz/multiplatform-swiftpackage")
+    pom {
+        name = "Multiplatform Swift Package Export"
+        description = "Gradle plugin to generate a Swift.package file and XCFramework to distribute a Kotlin Multiplatform iOS library"
+        inceptionYear = "2025"
+        url = "https://github.com/wcharysz/multiplatform-swiftpackage"
 
-                licenses {
-                    license {
-                        name.set("Apache License, Version 2.0")
-                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-                developers {
-                    developer {
-                        name.set("Georg Dresler")
-                    }
-                }
-                scm {
-                    connection.set("scm:git: https://github.com/wcharysz/multiplatform-swiftpackage.git")
-                    developerConnection.set("scm:git:ssh://github.com/wcharysz/multiplatform-swiftpackage.git")
-                    url.set(" https://github.com/wcharysz/multiplatform-swiftpackage")
-                }
+        licenses {
+            license {
+                name = "Apache License, Version 2.0"
+                url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
             }
         }
-    }
 
-    repositories {
-        maven {
-            val releasesUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-            val snapshotsUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-            name = "mavencentral"
-            url = uri(if (version.toString().endsWith("SNAPSHOT")) snapshotsUrl else releasesUrl)
-            credentials {
-                username = System.getenv("ossrh.username") ?: properties["ossrh.username"].toString()
-                password = System.getenv("ossrh.password") ?: properties["ossrh.password"].toString()
+        developers {
+            developer {
+                name.set("Georg Dresler")
+            }
+
+            developer {
+                name.set("Wojciech Charysz")
             }
         }
-    }
-}
 
-signing {
-    sign(publishing.publications["pluginMaven"])
+        scm {
+            url = "https://github.com/wcharysz/multiplatform-swiftpackage"
+            connection = "scm:git:https://github.com/wcharysz/multiplatform-swiftpackage.git"
+            developerConnection = "scm:git:ssh://github.com/wcharysz/multiplatform-swiftpackage.git"
+        }
+    }
 }
 
 tasks.javadoc {
