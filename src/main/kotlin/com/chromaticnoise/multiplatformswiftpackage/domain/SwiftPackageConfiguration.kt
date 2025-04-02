@@ -19,6 +19,14 @@ internal data class SwiftPackageConfiguration(
         is DistributionMode.Remote -> distributionMode.url.appendPath(zipFileName.nameWithExtension)
     }
 
+    // Determine if the zip file name is custom or default
+    private val localPath = if (zipFileName.nameWithExtension.startsWith("${packageName.value}-${project.version}")) {
+        "./${packageName.value}.xcframework"
+    } else {
+        // For custom zip file name, use it without the .zip extension
+        "./${zipFileName.nameWithExtension}"
+    }
+
     internal val templateProperties = mapOf(
         "toolsVersion" to toolVersion.name,
         "name" to packageName.value,
@@ -27,7 +35,8 @@ internal data class SwiftPackageConfiguration(
         "url" to distributionUrl?.value,
         "checksum" to zipChecksum.trim(),
         "hasLibraryType" to (libraryType != null),
-        "libraryType" to libraryType?.value
+        "libraryType" to libraryType?.value,
+        "localPath" to localPath
     )
 
     internal companion object {
