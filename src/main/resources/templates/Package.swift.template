@@ -16,7 +16,7 @@ let package = Package(
     targets: [
 <% if (isLocal) print """        .binaryTarget(
             name: "$name",
-            path: "./${name}.xcframework"
+            path: "$localPath"
         ),""" else print """        .binaryTarget(
             name: "$name",
             url: "$url",
