@@ -1,8 +1,6 @@
-plugins {
-    id("de.fayard.refreshVersions") version "0.60.5"
-}
 
-refreshVersions { // Optional: configure the plugin
+plugins {
+	id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
 rootProject.name = "multiplatform-swiftpackage"

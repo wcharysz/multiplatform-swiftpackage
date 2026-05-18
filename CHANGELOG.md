@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 tbd
 
+## [2.3.1]
+### Fixed
+- Fixed build compatibility for Gradle 9
+
 ## [2.3.0]
 ### Changed
 - Updated toolchain to JDK 17

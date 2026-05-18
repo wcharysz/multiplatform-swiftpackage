@@ -2,7 +2,7 @@ package com.chromaticnoise.multiplatformswiftpackage.task
 
 import com.chromaticnoise.multiplatformswiftpackage.domain.*
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.task
+import org.gradle.kotlin.dsl.register
 import org.jetbrains.kotlin.gradle.tasks.FatFrameworkTask
 import java.io.File
 
@@ -39,7 +39,7 @@ internal fun getTvosSimulatorFrameworks(configuration: PluginConfiguration): Lis
 }
 
 internal fun Project.registerCreateUniversalMacosFrameworkTask() =
-    task<FatFrameworkTask>("createUniversalMacosFramework") {
+    tasks.register<FatFrameworkTask>("createUniversalMacosFramework") {
         group = "multiplatform-swift-package"
         description = "Creates a universal (fat) macos framework"
         val configuration = getConfigurationOrThrow()
@@ -55,7 +55,7 @@ internal fun Project.registerCreateUniversalMacosFrameworkTask() =
     }
 
 internal fun Project.registerCreateUniversalIosSimulatorFrameworkTask() =
-    task<FatFrameworkTask>("createUniversalIosSimulatorFramework") {
+    tasks.register<FatFrameworkTask>("createUniversalIosSimulatorFramework") {
         group = "multiplatform-swift-package"
         description = "Creates a universal (fat) ios simulator framework"
         val configuration = getConfigurationOrThrow()
@@ -175,7 +175,7 @@ internal fun Project.registerCreateXCFrameworkTask() = tasks.register("createXCF
     )
 
     doLast {
-        exec {
+        project.providers.exec {
             executable = "xcodebuild"
             this.args(mutableListOf<String>().apply {
                 add("-create-xcframework")
@@ -191,7 +191,7 @@ internal fun Project.registerCreateXCFrameworkTask() = tasks.register("createXCF
                     }
                 }
             })
-        }
+        }.result.get().assertNormalExitValue()
     }
 
     doFirst {
