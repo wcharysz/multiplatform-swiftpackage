@@ -11,9 +11,10 @@ import io.kotest.property.Arb
 import io.kotest.property.arbitrary.filter
 import io.kotest.property.arbitrary.string
 import io.kotest.property.forAll
+import org.gradle.testfixtures.ProjectBuilder
 
 class TargetPlatformDslTest : StringSpec() {
-    private val mockProject = org.gradle.api.Project::class.java.getDeclaredConstructor().newInstance() // Or use a proper mock framework
+    private val mockProject = ProjectBuilder.builder().build()
 
     init {
         "adding ios targets should add arm 64 target" {

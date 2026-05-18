@@ -1,12 +1,12 @@
 package com.chromaticnoise.multiplatformswiftpackage.domain
 
-enum class LibraryType(val value: String) {
+internal enum class LibraryType(internal val value: String) {
     STATIC("static"),
     DYNAMIC("dynamic");
 
     override fun toString(): String = value
 
-    companion object {
+    internal companion object {
         internal fun of(type: String): Either<PluginConfiguration.PluginConfigurationError, LibraryType> =
             when (type.lowercase()) {
                 "static" -> Either.Right(STATIC)
