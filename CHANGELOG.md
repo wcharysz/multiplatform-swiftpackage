@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 tbd
 
+## [2.3.2]
+### Changed
+- Maintenance release.
+
 ## [2.3.1]
 ### Fixed
 - Fixed build compatibility for Gradle 9
