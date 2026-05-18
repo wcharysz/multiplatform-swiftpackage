@@ -1,20 +1,10 @@
 import com.vanniktech.maven.publish.SonatypeHost
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath(libs.binary.compatibility.validator)
-    }
-}
-
-apply(plugin = "binary-compatibility-validator")
-
 plugins {
     `kotlin-dsl`
     `java-gradle-plugin`
     signing
+    id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.18.1"
     id("com.vanniktech.maven.publish") version "0.31.0"
 }
 
@@ -27,6 +17,16 @@ repositories {
 
 kotlin {
     jvmToolchain(17)
+    explicitApiWarning()
+    compilerOptions {
+        progressiveMode.set(true)
+        // Opt-in strict mode in CI with -PwarningsAsErrors=true.
+        allWarningsAsErrors.set(
+            providers.gradleProperty("warningsAsErrors")
+                .map(String::toBoolean)
+                .orElse(false)
+        )
+    }
 }
 
 dependencies {
