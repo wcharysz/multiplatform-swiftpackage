@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 tbd
 
+## [2.3.0]
+### Changed
+- Updated toolchain to JDK 17
+- Updated Gradle versions
+- Replaced deprecated functions
+
 ## [2.0.3]
 ### Added
 - The plugin DSL is now compatible with Groovy
