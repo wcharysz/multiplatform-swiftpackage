@@ -1,4 +1,3 @@
-
 # Created by https://www.toptal.com/developers/gitignore/api/gradle,intellij+all,macos,windows,linux,kotlin
 # Edit at https://www.toptal.com/developers/gitignore?templates=gradle,intellij+all,macos,windows,linux,kotlin
 
@@ -208,3 +207,8 @@ gradle-app.setting
 
 local.properties
 versions.properties
+
+# Local signing material (never commit)
+*.gpg
+secring.*
+key.*
