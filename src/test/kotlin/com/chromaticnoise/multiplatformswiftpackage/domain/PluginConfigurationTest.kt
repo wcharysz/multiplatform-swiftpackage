@@ -74,7 +74,7 @@ class PluginConfigurationTest : BehaviorSpec() {
                 extension.swiftToolsVersion = SwiftToolVersion.of("42")
                 extension.packageName = null
                 extension.appleTargets = listOf(
-                    mockk { every { getFramework(any()) } returns framework }
+                    mockk { every { getFramework(any(), any()) } returns framework }
                 )
 
                 Then("the base name of the first framework should be used") {

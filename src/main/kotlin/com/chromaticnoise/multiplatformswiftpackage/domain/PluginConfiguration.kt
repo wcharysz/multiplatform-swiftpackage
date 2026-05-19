@@ -63,7 +63,10 @@ internal class PluginConfiguration private constructor(
         }
 
         private fun SwiftPackageExtension.getPackageName(): Either<PluginConfigurationError, PackageName> = packageName
-            ?: appleTargets.map { it.getFramework(buildConfiguration) }.firstOrNull()?.let { framework ->
+            ?: appleTargets.map { it.getFramework(buildConfiguration, preferPod = false) }.firstOrNull()?.let { framework ->
+                // preferPod=false: use the user-configured (non-CocoaPods) framework baseName so the
+                // package name matches what the consumer declared (e.g. "MCSdk"), not the CocoaPods
+                // pod binary's baseName which is derived from the Kotlin project name (e.g. "mobilecredential").
                 PackageName.of(framework.name.value)
             } ?: Either.Left(BlankPackageName)
 
