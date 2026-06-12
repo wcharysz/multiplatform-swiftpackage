@@ -3,6 +3,7 @@ package com.chromaticnoise.multiplatformswiftpackage.task
 import com.chromaticnoise.multiplatformswiftpackage.domain.*
 import org.gradle.api.GradleException
 import org.gradle.api.Project
+import org.gradle.api.services.BuildServiceRegistration
 import org.jetbrains.kotlin.gradle.plugin.mpp.Framework
 import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
@@ -20,6 +21,15 @@ internal fun Project.registerKotlinXCFramework(configuration: PluginConfiguratio
     // framework search paths injected.
     if (tasks.names.contains("assemble${packageName}ReleaseXCFramework") ||
         tasks.names.contains("assemble${packageName}DebugXCFramework")) return
+
+    // Actively configure KGP's KotlinNativeBundleBuildService maxParallelUsages so that
+    // all K/N compile and link tasks for different targets can run concurrently.
+    // KGP registers the service in afterEvaluate; we run in projectsEvaluated (after all
+    // afterEvaluate callbacks), so the registration exists by the time we get here and
+    // maxParallelUsages has not yet been finalized (finalization happens at task execution).
+    // We also emit a warning as a fallback so the consumer can configure gradle.properties
+    // manually if the direct configuration is not possible for some reason.
+    enforceNativeParallelism(configuration.appleTargets.size)
 
     runCatching {
         val xcFramework = XCFramework(packageName)
@@ -40,6 +50,92 @@ internal fun Project.registerKotlinXCFramework(configuration: PluginConfiguratio
     }.getOrElse { throwable ->
         if (throwable.message?.contains("already exists", ignoreCase = true) == true) return
         throw throwable
+    }
+}
+
+/**
+ * Enforces parallel Kotlin/Native compilation for multi-target builds.
+ *
+ * KGP's `KotlinNativeBundleBuildService` controls how many K/N compiler invocations
+ * (i.e. `compileKotlin*` + `linkRelease*` tasks) can run concurrently.  Its
+ * `maxParallelUsages` defaults to **1**, serialising all targets onto a single Gradle
+ * worker even when `org.gradle.parallel=true` and `org.gradle.workers.max` are both
+ * set generously.
+ *
+ * This function takes a two-pronged approach:
+ *
+ * 1. **Direct service configuration** (primary path) — iterates all Gradle shared-build-
+ *    service registrations at the end of the configuration phase (inside
+ *    `projectsEvaluated`) and raises `maxParallelUsages` on any registration whose name
+ *    matches KGP's native-bundle service.  At this point the configuration phase is still
+ *    active, so `maxParallelUsages` has not yet been finalized by Gradle.
+ *
+ * 2. **Fallback warning** — if no matching service is found (e.g. KGP was upgraded and
+ *    renamed it), emits a Gradle lifecycle warning directing the consumer to set
+ *    `kotlin.native.parallelism` in `gradle.properties`.
+ *
+ * Note: raising `maxParallelUsages` above 1 only takes effect when
+ * `org.gradle.parallel=true` is also set (Gradle will not schedule tasks in parallel
+ * otherwise).
+ */
+private fun Project.enforceNativeParallelism(numTargets: Int) {
+    if (numTargets <= 1) return
+
+    var configured = false
+
+    // KGP registers KotlinNativeBundleBuildService in afterEvaluate; we are in
+    // projectsEvaluated so all registrations already exist — forEach processes them
+    // all immediately without needing to listen for future registrations.
+    @Suppress("UNCHECKED_CAST")
+    (gradle.sharedServices.registrations as Iterable<BuildServiceRegistration<*, *>>).forEach { registration ->
+        val regName = registration.name
+        // Match KGP's service by name fragments that have been stable across KGP versions.
+        if (regName.contains("NativeBundle", ignoreCase = true) ||
+            regName.contains("KotlinNativeBundle", ignoreCase = true)
+        ) {
+            runCatching {
+                val current = registration.maxParallelUsages.orNull ?: 1
+                if (current < numTargets) {
+                    registration.maxParallelUsages.set(numTargets)
+                    logger.lifecycle(
+                        "multiplatform-swiftpackage: raised '$regName' maxParallelUsages " +
+                        "$current → $numTargets to allow parallel K/N compilation."
+                    )
+                } else {
+                    logger.info(
+                        "multiplatform-swiftpackage: '$regName' maxParallelUsages=$current " +
+                        "already covers $numTargets targets — no change needed."
+                    )
+                }
+                configured = true
+            }.onFailure { ex ->
+                logger.warn(
+                    "multiplatform-swiftpackage: could not set maxParallelUsages on " +
+                    "'$regName' (property may already be finalized): ${ex.message}"
+                )
+            }
+        }
+    }
+
+    // Fallback: if the service was not found (e.g. KGP renamed it), advise the consumer
+    // to configure the property manually so KGP picks it up at startup.
+    if (!configured) {
+        val propertyValue = findProperty("kotlin.native.parallelism")?.toString()?.toIntOrNull()
+        if (propertyValue == null || propertyValue < numTargets) {
+            val current = if (propertyValue == null) "not set (defaults to 1)" else "$propertyValue"
+            logger.warn(
+                """
+                |multiplatform-swiftpackage ⚠  Could not locate KGP's KotlinNativeBundleBuildService
+                |to configure parallel K/N compilation automatically.
+                |kotlin.native.parallelism is $current but you have $numTargets Kotlin/Native targets.
+                |All compile and link tasks may run sequentially, making the build slower than necessary.
+                |
+                |Add the following to your gradle.properties:
+                |  kotlin.native.parallelism=$numTargets
+                |  org.gradle.parallel=true
+                """.trimMargin()
+            )
+        }
     }
 }
 

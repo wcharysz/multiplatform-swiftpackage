@@ -10,6 +10,7 @@ public class com/chromaticnoise/multiplatformswiftpackage/SwiftPackageExtension 
 	public final fun buildConfiguration (Lkotlin/jvm/functions/Function1;)V
 	public final fun distributionMode (Lgroovy/lang/Closure;)V
 	public final fun distributionMode (Lkotlin/jvm/functions/Function1;)V
+	public final fun libraryType (Ljava/lang/String;)V
 	public final fun outputDirectory (Ljava/io/File;)V
 	public final fun packageName (Ljava/lang/String;)V
 	public final fun swiftToolsVersion (Ljava/lang/String;)V
@@ -32,7 +33,7 @@ public final class com/chromaticnoise/multiplatformswiftpackage/dsl/Distribution
 }
 
 public final class com/chromaticnoise/multiplatformswiftpackage/dsl/TargetPlatformDsl {
-	public fun <init> ()V
+	public fun <init> (Lorg/gradle/api/Project;)V
 	public final fun iOS (Lgroovy/lang/Closure;)V
 	public final fun iOS (Lkotlin/jvm/functions/Function1;)V
 	public final fun macOS (Lgroovy/lang/Closure;)V

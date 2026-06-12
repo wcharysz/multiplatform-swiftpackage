@@ -9,7 +9,11 @@ plugins {
 }
 
 group = "io.github.wcharysz"
-version = "2.3.2"
+version = "2.3.17"
+
+val publishingToMavenLocal = gradle.startParameter.taskNames.any { taskName ->
+    taskName.contains("publishToMavenLocal", ignoreCase = true)
+}
 
 repositories {
     mavenCentral()
@@ -72,7 +76,9 @@ gradlePlugin {
 
 mavenPublishing {
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
-    signAllPublications()
+    if (!publishingToMavenLocal) {
+        signAllPublications()
+    }
 
     coordinates(group.toString(), "multiplatform-swiftpackage", version.toString())
 
