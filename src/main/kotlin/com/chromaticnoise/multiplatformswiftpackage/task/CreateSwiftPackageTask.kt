@@ -14,28 +14,49 @@ internal fun Project.registerCreateSwiftPackageTask() {
         dependsOn("createZipFile")
 
         doLast {
-            val configuration = getConfigurationOrThrow()
-            val packageFile = File(configuration.outputDirectory.value, SwiftPackageConfiguration.FILE_NAME).apply {
-                parentFile.mkdirs()
-                createNewFile()
+            val (configuration, configMs) = measureExecutionMs {
+                getConfigurationOrThrow()
             }
 
-            val packageConfiguration = SwiftPackageConfiguration(
-                project = project,
-                packageName = configuration.packageName,
-                toolVersion = configuration.swiftToolsVersion,
-                platforms = platforms(configuration),
-                distributionMode = configuration.distributionMode,
-                zipChecksum = zipFileChecksum(project, configuration.outputDirectory, configuration.zipFileName),
-                zipFileName = configuration.zipFileName,
-                libraryType = configuration.libraryType
-            )
+            val (packageFile, fileInitMs) = measureExecutionMs {
+                File(configuration.outputDirectory.value, SwiftPackageConfiguration.FILE_NAME).apply {
+                    parentFile.mkdirs()
+                    createNewFile()
+                }
+            }
 
-            SimpleTemplateEngine()
-                .createTemplate(SwiftPackageConfiguration.templateFile)
-                .make(packageConfiguration.templateProperties)
-                .writeTo(packageFile.writer())
+            val (checksum, checksumMs) = measureExecutionMs {
+                zipFileChecksum(project, configuration.outputDirectory, configuration.zipFileName)
+            }
+
+            val (packageConfiguration, modelMs) = measureExecutionMs {
+                SwiftPackageConfiguration(
+                    project = project,
+                    packageName = configuration.packageName,
+                    toolVersion = configuration.swiftToolsVersion,
+                    platforms = platforms(configuration),
+                    distributionMode = configuration.distributionMode,
+                    zipChecksum = checksum,
+                    zipFileName = configuration.zipFileName,
+                    libraryType = configuration.libraryType
+                )
+            }
+
+            val (_, renderMs) = measureExecutionMs {
+                SimpleTemplateEngine()
+                    .createTemplate(SwiftPackageConfiguration.templateFile)
+                    .make(packageConfiguration.templateProperties)
+                    .writeTo(packageFile.writer())
+            }
+
+            logger.lifecycle(
+                "[multiplatform-swift-package][timing] createSwiftPackage phases " +
+                    "(config=${configMs}ms, fileInit=${fileInitMs}ms, checksum=${checksumMs}ms, " +
+                    "model=${modelMs}ms, render=${renderMs}ms) | output=${packageFile.absolutePath}"
+            )
         }
+
+        addTimingLogger("createSwiftPackage")
     }
 }
 

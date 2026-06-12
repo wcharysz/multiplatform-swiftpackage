@@ -1,10 +1,22 @@
 package com.chromaticnoise.multiplatformswiftpackage.task
 
 import com.chromaticnoise.multiplatformswiftpackage.domain.*
+import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.register
 import org.jetbrains.kotlin.gradle.tasks.FatFrameworkTask
+import org.gradle.process.ExecOperations
 import java.io.File
+import javax.inject.Inject
 
 
 internal fun getMacosFrameworks(configuration: PluginConfiguration): List<AppleFramework> {
@@ -43,8 +55,8 @@ internal fun Project.registerCreateUniversalMacosFrameworkTask() =
         group = "multiplatform-swift-package"
         description = "Creates a universal (fat) macos framework"
         val configuration = getConfigurationOrThrow()
-        onlyIf { getMacosFrameworks(configuration).size > 1 }
         val targets = getMacosFrameworks(configuration)
+        onlyIf { targets.size > 1 }
         dependsOn(targets.map { it.linkTask.name })
         if (targets.isNotEmpty()) {
             val buildType = if (targets[0].linkTask.name.contains("Release")) "release" else "debug"
@@ -52,6 +64,7 @@ internal fun Project.registerCreateUniversalMacosFrameworkTask() =
             destinationDirProperty.set(layout.buildDirectory.dir("bin/macosUniversal/${buildType}Framework"))
             from(targets.mapNotNull { it.framework })
         }
+        addTimingLogger("createUniversalMacosFramework") { "targets=${targets.size}" }
     }
 
 internal fun Project.registerCreateUniversalIosSimulatorFrameworkTask() =
@@ -59,8 +72,8 @@ internal fun Project.registerCreateUniversalIosSimulatorFrameworkTask() =
         group = "multiplatform-swift-package"
         description = "Creates a universal (fat) ios simulator framework"
         val configuration = getConfigurationOrThrow()
-        onlyIf { getIosSimulatorFrameworks(configuration).size > 1 }
         val targets = getIosSimulatorFrameworks(configuration)
+        onlyIf { targets.size > 1 }
         dependsOn(targets.map { it.linkTask.name })
         if (targets.isNotEmpty()) {
             val buildType = if (targets[0].linkTask.name.contains("Release")) "release" else "debug"
@@ -68,6 +81,7 @@ internal fun Project.registerCreateUniversalIosSimulatorFrameworkTask() =
             destinationDirProperty.set(layout.buildDirectory.dir("bin/iosSimulatorUniversal/${buildType}Framework"))
             from(targets.mapNotNull { it.framework })
         }
+        addTimingLogger("createUniversalIosSimulatorFramework") { "targets=${targets.size}" }
     }
 
 internal fun Project.registerCreateUniversalWatchosSimulatorFrameworkTask() =
@@ -75,8 +89,8 @@ internal fun Project.registerCreateUniversalWatchosSimulatorFrameworkTask() =
         group = "multiplatform-swift-package"
         description = "Creates a universal (fat) watchos simulator framework"
         val configuration = getConfigurationOrThrow()
-        onlyIf { getWatchosSimulatorFrameworks(configuration).size > 1 }
         val targets = getWatchosSimulatorFrameworks(configuration)
+        onlyIf { targets.size > 1 }
         dependsOn(targets.map { it.linkTask.name })
         if (targets.isNotEmpty()) {
             val buildType = if (targets[0].linkTask.name.contains("Release")) "release" else "debug"
@@ -84,6 +98,7 @@ internal fun Project.registerCreateUniversalWatchosSimulatorFrameworkTask() =
             destinationDirProperty.set(layout.buildDirectory.dir("bin/watchosSimulatorUniversal/${buildType}Framework"))
             from(targets.mapNotNull { it.framework })
         }
+        addTimingLogger("createUniversalWatchosSimulatorFramework") { "targets=${targets.size}" }
     }
 
 internal fun Project.registerCreateUniversalTvosSimulatorFrameworkTask() =
@@ -91,8 +106,8 @@ internal fun Project.registerCreateUniversalTvosSimulatorFrameworkTask() =
         group = "multiplatform-swift-package"
         description = "Creates a universal (fat) tvos simulator framework"
         val configuration = getConfigurationOrThrow()
-        onlyIf { getTvosSimulatorFrameworks(configuration).size > 1 }
         val targets = getTvosSimulatorFrameworks(configuration)
+        onlyIf { targets.size > 1 }
         dependsOn(targets.map { it.linkTask.name })
         if (targets.isNotEmpty()) {
             val buildType = if (targets[0].linkTask.name.contains("Release")) "release" else "debug"
@@ -100,6 +115,7 @@ internal fun Project.registerCreateUniversalTvosSimulatorFrameworkTask() =
             destinationDirProperty.set(layout.buildDirectory.dir("bin/tvosSimulatorUniversal/${buildType}Framework"))
             from(targets.mapNotNull { it.framework })
         }
+        addTimingLogger("createUniversalTvosSimulatorFramework") { "targets=${targets.size}" }
     }
 
 
@@ -129,7 +145,7 @@ internal fun removeMonoFrameworksAndAddUniversalFrameworkIfNeeded(
 }
 
 
-internal fun Project.registerCreateXCFrameworkTask() = tasks.register("createXCFramework") {
+internal fun Project.registerCreateXCFrameworkTask() = tasks.register<CreateXCFrameworkTaskImpl>("createXCFramework") {
     group = "multiplatform-swift-package"
     description = "Creates an XCFramework for all declared Apple targets"
 
@@ -140,33 +156,44 @@ internal fun Project.registerCreateXCFrameworkTask() = tasks.register("createXCF
         configuration.appleTargets.mapNotNull { it.getFramework(configuration.buildConfiguration) }.toMutableList()
 
     dependsOn(outputFrameworks.map { it.linkTask.name })
-    dependsOn("createUniversalMacosFramework")
-    dependsOn("createUniversalIosSimulatorFramework")
-    dependsOn("createUniversalWatchosSimulatorFramework")
-    dependsOn("createUniversalTvosSimulatorFramework")
 
     val macosFrameworks = getMacosFrameworks(configuration)
+    if (macosFrameworks.size > 1) {
+        dependsOn("createUniversalMacosFramework")
+    }
     removeMonoFrameworksAndAddUniversalFrameworkIfNeeded(
         "macos",
         layout.buildDirectory.asFile.get(),
         macosFrameworks,
         outputFrameworks
     )
+
     val iosSimulatorFrameworks = getIosSimulatorFrameworks(configuration)
+    if (iosSimulatorFrameworks.size > 1) {
+        dependsOn("createUniversalIosSimulatorFramework")
+    }
     removeMonoFrameworksAndAddUniversalFrameworkIfNeeded(
         "iosSimulator",
         layout.buildDirectory.asFile.get(),
         iosSimulatorFrameworks,
         outputFrameworks
     )
+
     val watchosSimulatorFrameworks = getWatchosSimulatorFrameworks(configuration)
+    if (watchosSimulatorFrameworks.size > 1) {
+        dependsOn("createUniversalWatchosSimulatorFramework")
+    }
     removeMonoFrameworksAndAddUniversalFrameworkIfNeeded(
         "watchosSimulator",
         layout.buildDirectory.asFile.get(),
         watchosSimulatorFrameworks,
         outputFrameworks
     )
+
     val tvosSimulatorFrameworks = getTvosSimulatorFrameworks(configuration)
+    if (tvosSimulatorFrameworks.size > 1) {
+        dependsOn("createUniversalTvosSimulatorFramework")
+    }
     removeMonoFrameworksAndAddUniversalFrameworkIfNeeded(
         "tvosSimulator",
         layout.buildDirectory.asFile.get(),
@@ -174,27 +201,80 @@ internal fun Project.registerCreateXCFrameworkTask() = tasks.register("createXCF
         outputFrameworks
     )
 
-    doLast {
-        project.providers.exec {
-            executable = "xcodebuild"
-            this.args(mutableListOf<String>().apply {
-                add("-create-xcframework")
-                add("-output")
-                add(xcFrameworkDestination.path)
-                outputFrameworks.forEach { framework ->
-                    add("-framework")
-                    add(framework.outputFile.path)
+    val frameworkFilePaths = outputFrameworks.map { it.outputFile.path }
+    val debugSymbolFilePaths = outputFrameworks.map { it.dsymFile.absolutePath }
 
-                    framework.dsymFile.takeIf { it.exists() }?.let { dsymFile ->
+    onlyIf { outputFrameworks.isNotEmpty() }
+
+    frameworkFiles.from(frameworkFilePaths)
+    debugSymbolFiles.from(debugSymbolFilePaths)
+    orderedFrameworkPaths.set(frameworkFilePaths)
+    orderedDebugSymbolPaths.set(debugSymbolFilePaths)
+    destinationDirectory.set(xcFrameworkDestination)
+    frameworkCount.set(outputFrameworks.size)
+}
+
+internal abstract class CreateXCFrameworkTaskImpl : DefaultTask() {
+
+    @get:Inject
+    protected abstract val execOperations: ExecOperations
+
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val frameworkFiles: ConfigurableFileCollection
+
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val debugSymbolFiles: ConfigurableFileCollection
+
+    @get:OutputDirectory
+    abstract val destinationDirectory: DirectoryProperty
+
+    @get:Input
+    abstract val orderedFrameworkPaths: ListProperty<String>
+
+    @get:Input
+    abstract val orderedDebugSymbolPaths: ListProperty<String>
+
+    @get:Input
+    abstract val frameworkCount: org.gradle.api.provider.Property<Int>
+
+    @TaskAction
+    fun createXCFramework() {
+        val destination = destinationDirectory.get().asFile
+        val (_, cleanupMs) = measureExecutionMs {
+            destination.deleteRecursively()
+        }
+
+        val frameworkPaths = orderedFrameworkPaths.get()
+        val debugSymbolPaths = orderedDebugSymbolPaths.get()
+        val (args, argumentBuildMs) = measureExecutionMs {
+            mutableListOf("-create-xcframework", "-output", destination.absolutePath).apply {
+                frameworkPaths.forEachIndexed { index, frameworkPath ->
+                    add("-framework")
+                    add(frameworkPath)
+
+                    val dsymPath = debugSymbolPaths.getOrNull(index)
+                    if (dsymPath != null && File(dsymPath).exists()) {
                         add("-debug-symbols")
-                        add(dsymFile.absolutePath)
+                        add(dsymPath)
                     }
                 }
-            })
-        }.result.get().assertNormalExitValue()
-    }
+            }
+        }
 
-    doFirst {
-        xcFrameworkDestination.deleteRecursively()
+        val (_, xcodebuildMs) = measureExecutionMs {
+            execOperations.exec {
+                executable = "xcodebuild"
+                this.args(args)
+            }.assertNormalExitValue()
+        }
+
+        val totalMs = cleanupMs + argumentBuildMs + xcodebuildMs
+        logger.lifecycle(
+            "[multiplatform-swift-package][timing] createXCFramework total=${totalMs}ms " +
+                "(cleanup=${cleanupMs}ms, buildArgs=${argumentBuildMs}ms, xcodebuild=${xcodebuildMs}ms) " +
+                "| frameworks=${frameworkCount.get()}, debugSymbols=${debugSymbolPaths.count { File(it).exists() }}"
+        )
     }
 }

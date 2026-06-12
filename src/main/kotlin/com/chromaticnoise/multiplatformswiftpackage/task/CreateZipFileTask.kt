@@ -18,5 +18,11 @@ internal fun Project.registerCreateZipFileTask() {
         from(outputDirectory) {
             include("**/*.xcframework/")
         }
+
+        addTimingLogger("createZipFile") {
+            val archive = archiveFile.orNull?.asFile
+            val bytes = archive?.takeIf { it.exists() }?.length()
+            "archive=${archive?.name ?: "unknown"}, bytes=${bytes ?: "missing"}"
+        }
     }
 }
